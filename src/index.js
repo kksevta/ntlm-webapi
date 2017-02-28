@@ -8,6 +8,8 @@ var ntlm = require('httpntlm').ntlm,
     keepaliveAgent = new HttpAgent({
         keepAlive: true
     });
+var HttpsAgent = require('agentkeepalive').HttpsAgent;
+var keepaliveAgentHttps = new HttpsAgent();
 
 
 var ntlmWebRequest = function(options) {
@@ -27,14 +29,17 @@ ntlmWebRequest.prototype = {
     },
 
     postType1ToServer: function(request, callback){
-
+        var agent=keepaliveAgent;
+        if(request.options.protocol && request.options.protocol=='https'){
+            agent=keepaliveAgentHttps;
+        }
         var _options = {
             headers: {
                 'Content-Type': 'application/json; charset=utf-8',
                 'Connection': 'keep-alive',
                 'Authorization': request.type1msg
             },
-            agent: keepaliveAgent
+            agent: agent
         };
 
         if (request.body) _options.body = request.body;
@@ -62,7 +67,10 @@ ntlmWebRequest.prototype = {
     },
 
     postType3ToServer: function(request, callback){
-
+        var agent=keepaliveAgent;
+        if(request.options.protocol && request.options.protocol=='https'){
+            agent=keepaliveAgentHttps;
+        }
         var _options = {
             headers: {
                 'Content-Type': 'application/json; charset=utf-8',
@@ -70,7 +78,7 @@ ntlmWebRequest.prototype = {
                 'Authorization': request.type3msg
             },
             allowRedirects: false,
-            agent: keepaliveAgent
+            agent: agent
         };
 
         if (request.body) _options.body = request.body;
